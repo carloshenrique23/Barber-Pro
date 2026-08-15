@@ -1,0 +1,44 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Appointment {
+  id        Int      @id @default(autoincrement())
+  name      String
+  phone     String
+  service   String
+  price     Float    @default(0)
+  date      DateTime
+  time      String
+  status    String   @default("PENDENTE")
+  createdAt DateTime @default(now())
+}
+model Service {
+  id        Int      @id @default(autoincrement())
+  name      String
+  price     Float
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+}
+model BarberSettings {
+  id           Int      @id @default(1)
+  name         String   @default("Barber Pro")
+  whatsapp     String   @default("")
+  address      String   @default("")
+  instagram    String   @default("")
+  openingHours String   @default("Segunda a Sábado - 08:00 às 19:00")
+  updatedAt    DateTime @updatedAt
+}
+model BlockedSlot {
+  id        Int      @id @default(autoincrement())
+  date      DateTime
+  time      String?
+  reason    String?
+  createdAt DateTime @default(now())
+}
