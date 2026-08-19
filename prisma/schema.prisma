@@ -18,14 +18,22 @@ model Appointment {
   time      String
   status    String   @default("PENDENTE")
   createdAt DateTime @default(now())
+
+  barbershopId Int
+  barbershop   Barbershop @relation(fields: [barbershopId], references: [id])
 }
+
 model Service {
   id        Int      @id @default(autoincrement())
   name      String
   price     Float
   active    Boolean  @default(true)
   createdAt DateTime @default(now())
+
+  barbershopId Int
+  barbershop   Barbershop @relation(fields: [barbershopId], references: [id])
 }
+
 model BarberSettings {
   id           Int      @id @default(1)
   name         String   @default("Barber Pro")
@@ -34,11 +42,30 @@ model BarberSettings {
   instagram    String   @default("")
   openingHours String   @default("Segunda a Sábado - 08:00 às 19:00")
   updatedAt    DateTime @updatedAt
+
+  barbershopId Int        @unique
+  barbershop   Barbershop @relation(fields: [barbershopId], references: [id])
 }
+
 model BlockedSlot {
   id        Int      @id @default(autoincrement())
   date      DateTime
   time      String?
   reason    String?
   createdAt DateTime @default(now())
+
+  barbershopId Int
+  barbershop   Barbershop @relation(fields: [barbershopId], references: [id])
+}
+
+model Barbershop {
+  id        Int      @id @default(autoincrement())
+  name      String
+  slug      String   @unique
+  createdAt DateTime @default(now())
+
+  appointments Appointment[]
+  services     Service[]
+  blockedSlots BlockedSlot[]
+  settings     BarberSettings?
 }

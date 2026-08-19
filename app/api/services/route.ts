@@ -1,9 +1,14 @@
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 
+const BARBERSHOP_ID = 1;
+
 export async function GET() {
   try {
     const services = await prisma.service.findMany({
+      where: {
+        barbershopId: BARBERSHOP_ID,
+      },
       orderBy: {
         id: "asc",
       },
@@ -11,7 +16,7 @@ export async function GET() {
 
     return NextResponse.json(services);
   } catch (error) {
-    console.error(error);
+    console.error("Erro ao buscar serviços:", error);
 
     return NextResponse.json(
       { message: "Erro ao buscar serviços." },
@@ -32,15 +37,19 @@ export async function POST(request: Request) {
     }
 
     const service = await prisma.service.create({
-      data: {
-        name: body.name.trim(),
-        price: Number(body.price),
-      },
-    });
+  data: {
+    name: body.name.trim(),
+    price: Number(body.price),
+    active: true,
+    barbershopId: BARBERSHOP_ID,
+  },
+});
 
-    return NextResponse.json(service, { status: 201 });
+    return NextResponse.json(service, {
+      status: 201,
+    });
   } catch (error) {
-    console.error(error);
+    console.error("Erro ao criar serviço:", error);
 
     return NextResponse.json(
       { message: "Erro ao criar serviço." },
@@ -48,5 +57,3 @@ export async function POST(request: Request) {
     );
   }
 }
-export const dynamic = "force-static";
-export const revalidate = 60;
