@@ -1,6 +1,8 @@
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 
+const BARBERSHOP_ID = 1;
+
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
@@ -24,6 +26,7 @@ export async function GET(request: Request) {
 
     const appointments = await prisma.appointment.findMany({
       where: {
+        barbershopId: BARBERSHOP_ID,
         date: appointmentDate,
         status: {
           not: "CANCELADO",
@@ -74,6 +77,7 @@ export async function POST(request: Request) {
     // Verifica se o dia inteiro está bloqueado
     const blockedDay = await prisma.blockedSlot.findFirst({
       where: {
+        barbershopId: BARBERSHOP_ID,
         date: appointmentDate,
         time: null,
       },
@@ -93,6 +97,7 @@ export async function POST(request: Request) {
     // Verifica se o horário específico está bloqueado
     const blockedTime = await prisma.blockedSlot.findFirst({
       where: {
+        barbershopId: BARBERSHOP_ID,
         date: appointmentDate,
         time: body.time,
       },
@@ -109,9 +114,10 @@ export async function POST(request: Request) {
       );
     }
 
-    // Busca o serviço e o preço atual
+    // Busca o serviço da barbearia
     const service = await prisma.service.findFirst({
       where: {
+        barbershopId: BARBERSHOP_ID,
         name: body.service,
         active: true,
       },
@@ -128,6 +134,7 @@ export async function POST(request: Request) {
     const existingAppointment =
       await prisma.appointment.findFirst({
         where: {
+          barbershopId: BARBERSHOP_ID,
           date: appointmentDate,
           time: body.time,
           status: {
@@ -153,6 +160,7 @@ export async function POST(request: Request) {
         date: appointmentDate,
         time: body.time,
         status: "PENDENTE",
+        barbershopId: BARBERSHOP_ID,
       },
     });
 
@@ -178,6 +186,21 @@ export async function DELETE(request: Request) {
       return NextResponse.json(
         { message: "ID do agendamento não informado." },
         { status: 400 }
+      );
+    }
+
+    const existingAppointment =
+      await prisma.appointment.findFirst({
+        where: {
+          id: Number(id),
+          barbershopId: BARBERSHOP_ID,
+        },
+      });
+
+    if (!existingAppointment) {
+      return NextResponse.json(
+        { message: "Agendamento não encontrado." },
+        { status: 404 }
       );
     }
 
